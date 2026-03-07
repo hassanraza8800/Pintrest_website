@@ -145,7 +145,18 @@ export default function AdminDashboard() {
                             <h1 className="text-3xl font-black text-gray-900 tracking-tight">Product Dashboard</h1>
                             <p className="text-gray-500">Manage your affiliate catalogue</p>
                         </div>
-                        <div className="flex items-center justify-center space-x-4">
+                        <div className="flex items-center justify-center flex-wrap gap-4">
+                            <a
+                                href="/api/auth/google/login"
+                                className="flex items-center justify-center px-5 py-2.5 bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 font-bold rounded-lg shadow-sm transition-all active:scale-[0.98]"
+                            >
+                                <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M12 2L1 21H23L12 2Z" fill="#FFC107" />
+                                    <path d="M12 2L6.5 11.5L12 21L17.5 11.5L12 2Z" fill="#1976D2" />
+                                    <path d="M1 21L6.5 11.5H17.5L23 21H1Z" fill="#4CAF50" />
+                                </svg>
+                                Connect Drive
+                            </a>
                             <Link
                                 href="/admin-secret/create"
                                 className="flex items-center justify-center px-5 py-2.5 bg-primary border border-gray-200 text-gray-900 hover:bg-orange-500 hover:text-white font-bold rounded-lg shadow-md transition-all active:scale-[0.98]"

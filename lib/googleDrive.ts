@@ -11,15 +11,45 @@ const CREDENTIALS_PATH = path.join(process.cwd(), 'credential.json');
 const FOLDER_ID = process.env.GOOGLE_DRIVE_FOLDER_ID || '';
 
 /**
- * Loads the saved credentials.
+ * Loads the credentials from environment variables or saved files.
  */
 async function loadSavedCredentialsIfExist() {
     try {
-        const content = await fs.readFile(TOKEN_PATH, 'utf8');
-        const credentials = JSON.parse(content);
-        return google.auth.fromJSON(credentials);
+        // Priority 1: Environment Variables (Vercel)
+        if (process.env.GOOGLE_TOKEN) {
+            return google.auth.fromJSON(JSON.parse(process.env.GOOGLE_TOKEN));
+        }
+
+        // Priority 2: Local Files (Development)
+        try {
+            const content = await fs.readFile(TOKEN_PATH, 'utf8');
+            return google.auth.fromJSON(JSON.parse(content));
+        } catch (err) {
+            // No token file found, check if we have credentials to start fresh
+            return null;
+        }
     } catch (err) {
-        console.error('Error loading token.json:', err);
+        console.error('Error loading Google authentication:', err);
+        return null;
+    }
+}
+
+/**
+ * Gets the OAuth client configuration from env or file.
+ */
+export async function getGoogleAuthConfiguration() {
+    // Priority 1: Environment Variables
+    if (process.env.GOOGLE_CREDENTIALS) {
+        const creds = JSON.parse(process.env.GOOGLE_CREDENTIALS);
+        return creds.web || creds.installed;
+    }
+
+    // Priority 2: Local Files
+    try {
+        const content = await fs.readFile(CREDENTIALS_PATH, 'utf8');
+        const creds = JSON.parse(content);
+        return creds.web || creds.installed;
+    } catch (err) {
         return null;
     }
 }
@@ -30,7 +60,7 @@ async function loadSavedCredentialsIfExist() {
 export async function getGoogleDriveClient() {
     const authClient = await loadSavedCredentialsIfExist();
     if (!authClient) {
-        throw new Error('Could not load Google authentication. Have you run the generate-token.js script?');
+        throw new Error('Google Drive not connected. Please go to the dashboard and click "Connect Google Drive".');
     }
     return google.drive({ version: 'v3', auth: authClient as any });
 }
