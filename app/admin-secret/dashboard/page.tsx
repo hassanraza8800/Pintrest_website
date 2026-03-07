@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Plus, Edit, Trash2, LogOut, Package, AlertTriangle, X } from "lucide-react";
 import { Product } from "@/lib/fileHandler";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 // ─── Delete Confirmation Modal ──────────────────────────────────────────────
 function DeleteModal({
@@ -192,11 +193,14 @@ export default function AdminDashboard() {
                                             <tr key={product.id} className="hover:bg-gray-50/50 transition-colors group">
                                                 <td className="px-6 py-4">
                                                     <div className="flex items-center space-x-4">
-                                                        <img
-                                                            src={product.image}
-                                                            alt=""
-                                                            className="w-12 h-12 rounded-lg object-cover ring-1 ring-gray-100"
-                                                        />
+                                                        <div className="relative w-12 h-12 flex-shrink-0">
+                                                            <Image
+                                                                src={product.image}
+                                                                alt={product.title}
+                                                                fill
+                                                                className="rounded-lg object-cover ring-1 ring-gray-100"
+                                                            />
+                                                        </div>
                                                         <div>
                                                             <div className="font-bold text-gray-900 group-hover:text-primary transition-colors">{product.title}</div>
                                                             <div className="text-xs text-gray-400 font-mono truncate max-w-[200px]">{product.slug}</div>

@@ -9,8 +9,10 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@google-cloud/local-auth": "^2.1.0",
     "@tailwindcss/postcss": "^4.2.1",
     "clsx": "latest",
+    "googleapis": "^105.0.0",
     "lucide-react": "latest",
     "next": "latest",
     "react": "latest",

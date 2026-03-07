@@ -4,10 +4,10 @@ import { readProducts } from "@/lib/fileHandler";
 export default async function ProductsPage({
     searchParams,
 }: {
-    searchParams: { category?: string };
+    searchParams: Promise<{ category?: string }>;
 }) {
+    const { category } = await searchParams;
     const allProducts = await readProducts();
-    const category = searchParams.category;
 
     const filteredProducts = category
         ? allProducts.filter(p => p.category.toLowerCase() === category.toLowerCase())

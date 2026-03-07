@@ -5,8 +5,11 @@ export function middleware(request: NextRequest) {
 
     // Protect admin routes
     if (pathname.startsWith('/admin-secret')) {
+        // Normalize pathname to check for the login page
+        const normalizedPath = pathname.replace(/\/$/, '');
+
         // Skip protection for the login page itself to avoid infinite redirect
-        if (pathname === '/admin-secret') {
+        if (normalizedPath === '/admin-secret') {
             return NextResponse.next();
         }
 
@@ -25,5 +28,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-    matcher: '/admin-secret/:path*',
+    matcher: ['/admin-secret', '/admin-secret/:path*'],
 };

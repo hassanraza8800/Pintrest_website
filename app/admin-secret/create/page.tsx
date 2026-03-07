@@ -15,6 +15,7 @@ export default function CreateProduct() {
         category: "",
         tags: "",
     });
+    const [imageFile, setImageFile] = useState<File | null>(null);
     const [loading, setLoading] = useState(false);
     const router = useRouter();
 
@@ -28,24 +29,36 @@ export default function CreateProduct() {
         setLoading(true);
 
         try {
-            const payload = {
-                ...formData,
-                tags: formData.tags.split(",").map(t => t.trim()).filter(t => t !== ""),
-            };
+            const payload = new FormData();
+            payload.append("title", formData.title);
+            payload.append("slug", formData.slug);
+            payload.append("description", formData.description);
+            payload.append("affiliate_link", formData.affiliate_link);
+            payload.append("category", formData.category);
+            payload.append("tags", formData.tags);
+
+            if (formData.image) {
+                payload.append("image", formData.image);
+            }
+            if (imageFile) {
+                payload.append("image_file", imageFile);
+            }
 
             const res = await fetch("/api/products", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload),
+                // Notice: DO NOT set 'Content-Type' manually when sending FormData
+                body: payload,
             });
 
             if (res.ok) {
                 router.push("/admin-secret/dashboard");
             } else {
-                alert("Failed to create product");
+                const errorData = await res.json();
+                alert(`Failed to create product: ${errorData.error || 'Unknown error'}`);
             }
         } catch (err) {
-            alert("An error occurred");
+            console.error('Error creating product:', err);
+            alert("An error occurred while creating the product.");
         } finally {
             setLoading(false);
         }
@@ -107,16 +120,32 @@ export default function CreateProduct() {
                             />
                         </div>
 
-                        <div className="space-y-2">
-                            <label className="text-sm font-bold text-gray-700 uppercase tracking-wider">Image URL</label>
-                            <input
-                                required
-                                name="image"
-                                value={formData.image}
-                                onChange={handleChange}
-                                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:bg-white transition-all outline-none"
-                                placeholder="https://images.unsplash.com/..."
-                            />
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="space-y-2">
+                                <label className="text-sm font-bold text-gray-700 uppercase tracking-wider">Upload Image</label>
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={(e) => {
+                                        if (e.target.files && e.target.files[0]) {
+                                            setImageFile(e.target.files[0]);
+                                        }
+                                    }}
+                                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:bg-white transition-all outline-none"
+                                />
+                                <p className="text-xs text-gray-500">To upload to Google Drive automatically</p>
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-sm font-bold text-gray-700 uppercase tracking-wider">OR Image URL</label>
+                                <input
+                                    name="image"
+                                    value={formData.image}
+                                    onChange={handleChange}
+                                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:bg-white transition-all outline-none"
+                                    placeholder="https://images.unsplash.com/..."
+                                />
+                                <p className="text-xs text-gray-500">Provide a direct URL if not uploading</p>
+                            </div>
                         </div>
 
                         <div className="space-y-2">
@@ -159,7 +188,7 @@ export default function CreateProduct() {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full py-4 bg-primary hover:bg-red-700 text-white font-black rounded-xl shadow-lg hover:shadow-2xl transition-all flex items-center justify-center space-x-2 disabled:opacity-50"
+                            className="w-full py-4 bg-primary hover:bg-green-700 text-gray-600 font-black rounded-xl shadow-lg hover:shadow-2xl transition-all flex items-center hover:text-white justify-center space-x-2 disabled:opacity-50"
                         >
                             {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : <Save className="w-6 h-6" />}
                             <span>Save Product Listing</span>

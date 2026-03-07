@@ -23,7 +23,7 @@ export default function Footer() {
                         <ul className="space-y-2 text-sm text-gray-600">
                             <li><Link href="#" className="hover:text-primary">Privacy Policy</Link></li>
                             <li><Link href="#" className="hover:text-primary">Terms of Service</Link></li>
-                            <li><span className="italic">Disclosure: As an Amazon Associate I earn from qualifying purchases.</span></li>
+                            {/* <li><span className="italic">Disclosure: As an Amazon Associate I earn from qualifying purchases.</span></li> */}
                         </ul>
                     </div>
                 </div>

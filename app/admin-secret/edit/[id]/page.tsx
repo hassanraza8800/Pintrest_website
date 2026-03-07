@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Save, Loader2 } from "lucide-react";
+import Image from "next/image";
 
 export default function EditProduct() {
     const [formData, setFormData] = useState({
@@ -15,6 +16,7 @@ export default function EditProduct() {
         category: "",
         tags: "",
     });
+    const [imageFile, setImageFile] = useState<File | null>(null);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const router = useRouter();
@@ -54,25 +56,36 @@ export default function EditProduct() {
         setSaving(true);
 
         try {
-            const payload = {
-                id,
-                ...formData,
-                tags: formData.tags.split(",").map(t => t.trim()).filter(t => t !== ""),
-            };
+            const payload = new FormData();
+            payload.append("id", id as string);
+            payload.append("title", formData.title);
+            payload.append("slug", formData.slug);
+            payload.append("description", formData.description);
+            payload.append("affiliate_link", formData.affiliate_link);
+            payload.append("category", formData.category);
+            payload.append("tags", formData.tags);
+
+            if (formData.image) {
+                payload.append("image", formData.image);
+            }
+            if (imageFile) {
+                payload.append("image_file", imageFile);
+            }
 
             const res = await fetch("/api/products", {
                 method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload),
+                body: payload,
             });
 
             if (res.ok) {
                 router.push("/admin-secret/dashboard");
             } else {
-                alert("Failed to update product");
+                const errorData = await res.json();
+                alert(`Failed to update product: ${errorData.error || 'Unknown error'}`);
             }
         } catch (err) {
-            alert("An error occurred");
+            console.error('Error updating product:', err);
+            alert("An error occurred while updating the product.");
         } finally {
             setSaving(false);
         }
@@ -139,15 +152,47 @@ export default function EditProduct() {
                             />
                         </div>
 
-                        <div className="space-y-2">
-                            <label className="text-sm font-bold text-gray-700 uppercase tracking-wider">Image URL</label>
-                            <input
-                                required
-                                name="image"
-                                value={formData.image}
-                                onChange={handleChange}
-                                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:bg-white transition-all outline-none"
-                            />
+                        <div className="space-y-4">
+                            <label className="text-sm font-bold text-gray-700 uppercase tracking-wider">Product Image</label>
+
+                            {/* Current Image Preview */}
+                            {formData.image && (
+                                <div className="relative w-full aspect-video rounded-xl overflow-hidden border border-gray-200 bg-gray-50">
+                                    <Image
+                                        src={formData.image}
+                                        alt="Current product image"
+                                        fill
+                                        className="object-contain"
+                                    />
+                                </div>
+                            )}
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="space-y-2">
+                                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Upload New Image</label>
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={(e) => {
+                                            if (e.target.files && e.target.files[0]) {
+                                                setImageFile(e.target.files[0]);
+                                            }
+                                        }}
+                                        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:bg-white transition-all outline-none text-sm"
+                                    />
+                                    <p className="text-[10px] text-gray-400">Replaces the current image on Drive</p>
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">OR Edit Image URL</label>
+                                    <input
+                                        name="image"
+                                        value={formData.image}
+                                        onChange={handleChange}
+                                        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:bg-white transition-all outline-none text-sm"
+                                        placeholder="https://drive.google.com/..."
+                                    />
+                                </div>
+                            </div>
                         </div>
 
                         <div className="space-y-2">
