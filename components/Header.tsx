@@ -12,10 +12,12 @@ export default function Header() {
             <div className="container mx-auto px-4 h-16 flex items-center justify-between">
                 <div className="flex items-center space-x-8 flex-1">
                     <Link href="/" className="flex items-center space-x-2 shrink-0">
-                        <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
-                            <span className="text-white font-bold text-xl">V</span>
-                        </div>
-                        <span className="font-bold text-xl tracking-tight hidden sm:block whitespace-nowrap">Virelle beauty& bags</span>
+                        <img
+                            src="/logo.png"
+                            alt="Virelle Beauty & Bags Logo"
+                            className="h-10 sm:h-12 w-auto object-contain rounded-full"
+                        />
+                        <span className="font-bold text-xl text-gray-800 tracking-tight hidden sm:block whitespace-nowrap">Virelle beauty& bags</span>
                     </Link>
 
                     {/* Search Bar */}
