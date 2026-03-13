@@ -68,7 +68,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
                         <div className="space-y-6">
                             <div className="space-y-2">
                                 <span className="inline-block px-3 py-1 bg-orange-50 text-orange-600 text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] rounded-full">
-                                    {product.category.substring(0, 3)}
+                                    {product.category || 'All'}
                                 </span>
                                 <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-gray-900 leading-[1.1] tracking-tight">
                                     {product.title}
@@ -76,7 +76,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
                             </div>
 
                             <div className="flex flex-wrap gap-1.5">
-                                {product.tags.map(tag => (
+                                {product.tags.slice(0, 3).map(tag => (
                                     <span key={tag} className="px-2.5 py-1 bg-gray-50 text-gray-400 text-[10px] sm:text-[11px] font-bold rounded-lg border border-gray-100 uppercase tracking-wider">
                                         #{tag}
                                     </span>

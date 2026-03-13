@@ -21,15 +21,15 @@ export default function ProductCard({ product }: { product: Product }) {
                     />
                     <div className="absolute top-2 left-2">
                         <span className="bg-white/90 backdrop-blur-md px-1.5 py-0.5 rounded-md text-[7px] sm:text-[9px] font-black text-gray-700 shadow-sm uppercase tracking-tighter">
-                            {product.category.substring(0, 3)}
+                            {product.category || 'All'}
                         </span>
                     </div>
                 </div>
 
                 <div className="p-2 sm:p-4 mb-12 sm:mb-16 flex flex-col flex-grow">
                     <div className="mb-1 flex flex-wrap gap-1">
-                        {product.tags.slice(0, 1).map(tag => (
-                            <span key={tag} className="text-[7px] sm:text-[9px] uppercase tracking-tighter text-gray-400 font-black">
+                        {product.tags.slice(0, 3).map(tag => (
+                            <span key={tag} className="text-[7px] sm:text-[10px] uppercase tracking-tighter text-gray-400 font-black">
                                 #{tag}
                             </span>
                         ))}
@@ -39,7 +39,7 @@ export default function ProductCard({ product }: { product: Product }) {
                         {product.title}
                     </h3>
 
-                    <p className="text-gray-500 text-[10px] sm:text-sm mt-1 line-clamp-1 sm:line-clamp-2 leading-relaxed hidden xs:block">
+                    <p className="text-gray-500 text-[10px] sm:text-sm mt-1 line-clamp-1 sm:line-clamp-2 leading-relaxed">
                         {product.description}
                     </p>
                 </div>
