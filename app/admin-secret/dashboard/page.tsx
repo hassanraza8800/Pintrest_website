@@ -206,7 +206,7 @@ export default function AdminDashboard() {
                                                     <div className="flex items-center space-x-4">
                                                         <div className="relative w-12 h-12 flex-shrink-0">
                                                             <Image
-                                                                src={product.image}
+                                                                src={product.images[0] || "/placeholder.jpg"}
                                                                 alt={product.title}
                                                                 fill
                                                                 className="rounded-lg object-cover ring-1 ring-gray-100"

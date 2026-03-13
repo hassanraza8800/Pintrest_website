@@ -14,11 +14,10 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
     return {
         title: `${product.title} | AffiliateShop`,
-        description: product.description,
         openGraph: {
             title: product.title,
             description: product.description,
-            images: [product.image],
+            images: (product.images && product.images.length > 0) ? [product.images[0]] : [],
         },
     };
 }
@@ -54,7 +53,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
                     <div className="lg:col-span-7">
                         <div className="relative aspect-[4/5] md:aspect-square rounded-3xl overflow-hidden bg-gray-50 shadow-2xl shadow-gray-200/50 group">
                             <Image
-                                src={product.image}
+                                src={(product.images && product.images.length > 0) ? product.images[0] : "/placeholder.jpg"}
                                 alt={product.title}
                                 fill
                                 className="object-contain p-4 md:p-8 hover:scale-105 transition-transform duration-700"

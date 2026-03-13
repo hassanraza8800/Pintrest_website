@@ -13,7 +13,7 @@ export default function ProductCard({ product }: { product: Product }) {
             >
                 <div className="relative aspect-[3/4] overflow-hidden">
                     <Image
-                        src={product.image}
+                        src={(product.images && product.images.length > 0) ? product.images[0] : "/placeholder.jpg"}
                         alt={product.title}
                         fill
                         className="object-cover group-hover:scale-105 transition-transform duration-500"

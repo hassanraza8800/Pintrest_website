@@ -29,7 +29,7 @@ export async function POST(request: Request) {
             title: formData.get('title') as string || '',
             slug: formData.get('slug') as string || '',
             description: formData.get('description') as string || '',
-            image: imageUrl,
+            images: imageUrl ? [imageUrl] : [],
             affiliate_link: formData.get('affiliate_link') as string || '',
             category: formData.get('category') as string || '',
             tags,
@@ -66,7 +66,7 @@ export async function PUT(request: Request) {
             title: formData.get('title') as string || '',
             slug: formData.get('slug') as string || '',
             description: formData.get('description') as string || '',
-            image: imageUrl,
+            images: imageUrl ? [imageUrl] : [],
             affiliate_link: formData.get('affiliate_link') as string || '',
             category: formData.get('category') as string || '',
             tags,
@@ -93,9 +93,9 @@ export async function DELETE(request: Request) {
         const products = await readProducts();
         const product = products.find((p: any) => p.id === id);
 
-        if (product && product.image) {
-            // Cleanup the image from Google Drive
-            await deleteImageFromDrive(product.image);
+        if (product && product.images && product.images.length > 0) {
+            // Cleanup the first image from Google Drive
+            await deleteImageFromDrive(product.images[0]);
         }
 
         const deleted = await deleteProduct(id);

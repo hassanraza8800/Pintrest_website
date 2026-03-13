@@ -37,6 +37,7 @@ export default function EditProduct() {
         if (product) {
             setFormData({
                 ...product,
+                image: (product.images && product.images.length > 0) ? product.images[0] : "",
                 tags: product.tags.join(", "),
             });
         } else {
