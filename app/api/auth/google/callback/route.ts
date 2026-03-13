@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { google } from 'googleapis';
 import { getGoogleAuthConfiguration } from '@/lib/googleDrive';
+import fs from 'fs/promises';
+import path from 'path';
 
 export async function GET(request: Request) {
     const url = new URL(request.url);
@@ -27,6 +29,21 @@ export async function GET(request: Request) {
 
     try {
         const { tokens } = await oauth2Client.getToken(code);
+
+        // Save token to data/data.json locally for development
+        try {
+            const TOKEN_PATH = path.join(process.cwd(), 'data/data.json');
+            await fs.writeFile(TOKEN_PATH, JSON.stringify({
+                type: 'authorized_user',
+                client_id: client_id,
+                client_secret: client_secret,
+                refresh_token: tokens.refresh_token,
+            }, null, 2));
+            console.log('✅ Successfully saved token to data/data.json');
+        } catch (saveError) {
+            console.error('Error saving token locally:', saveError);
+            // We continue even if saving fails, as user can still manually copy it
+        }
 
         // Return a beautiful page with the token to copy
         return new NextResponse(`

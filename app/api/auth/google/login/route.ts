@@ -6,7 +6,7 @@ export async function GET(request: Request) {
     const config = await getGoogleAuthConfiguration();
 
     if (!config) {
-        return NextResponse.json({ error: 'Google credentials not configured. Please add credential.json or GOOGLE_CREDENTIALS env.' }, { status: 500 });
+        return NextResponse.json({ error: 'Google credentials not configured. Please add credentials.json or GOOGLE_CREDENTIALS env.' }, { status: 500 });
     }
 
     const { client_id, client_secret, redirect_uris } = config;

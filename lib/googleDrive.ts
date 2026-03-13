@@ -4,30 +4,24 @@ import path from 'path';
 import { Readable } from 'stream';
 
 const TOKEN_PATH = path.join(process.cwd(), 'token.json');
-const CREDENTIALS_PATH = path.join(process.cwd(), 'credential.json');
+const CREDENTIALS_PATH = path.join(process.cwd(), 'credentials.json');
 
 // We use the environment variable for the folder ID if present.
 // The user can define GOOGLE_DRIVE_FOLDER_ID in .env.local
-const FOLDER_ID = process.env.GOOGLE_DRIVE_FOLDER_ID || '';
+const FOLDER_ID = process.env.GOOGLE_DRIVE_FOLDER_ID || '1K4t2FaeGftzf8udEbH0KVWErhRYBypQk';
 
 /**
  * Loads the credentials from environment variables or saved files.
  */
 async function loadSavedCredentialsIfExist() {
     try {
-        // Priority 1: Environment Variables (Vercel)
-        if (process.env.GOOGLE_TOKEN) {
-            return google.auth.fromJSON(JSON.parse(process.env.GOOGLE_TOKEN));
-        }
+        const TOKEN_PATH = path.join(process.cwd(), 'data/data.json');
+        const content = await fs.readFile(TOKEN_PATH, 'utf8');
+        const creds = JSON.parse(content);
 
-        // Priority 2: Local Files (Development)
-        try {
-            const content = await fs.readFile(TOKEN_PATH, 'utf8');
-            return google.auth.fromJSON(JSON.parse(content));
-        } catch (err) {
-            // No token file found, check if we have credentials to start fresh
-            return null;
-        }
+        // This helper from googleapis properly handles the 'authorized_user' type
+        // if it has client_id, client_secret, and refresh_token.
+        return google.auth.fromJSON(creds);
     } catch (err) {
         console.error('Error loading Google authentication:', err);
         return null;
@@ -38,17 +32,12 @@ async function loadSavedCredentialsIfExist() {
  * Gets the OAuth client configuration from env or file.
  */
 export async function getGoogleAuthConfiguration() {
-    // Priority 1: Environment Variables
-    if (process.env.GOOGLE_CREDENTIALS) {
-        const creds = JSON.parse(process.env.GOOGLE_CREDENTIALS);
-        return creds.web || creds.installed;
-    }
-
     // Priority 2: Local Files
     try {
         const content = await fs.readFile(CREDENTIALS_PATH, 'utf8');
         const creds = JSON.parse(content);
-        return creds.web || creds.installed;
+        // Handle nested web/installed keys from Google Console exports
+        return creds.web || creds.installed || creds;
     } catch (err) {
         return null;
     }
@@ -64,6 +53,8 @@ export async function getGoogleDriveClient() {
     }
     return google.drive({ version: 'v3', auth: authClient as any });
 }
+
+
 
 /**
  * Uploads an image buffer to Google Drive and makes it public.

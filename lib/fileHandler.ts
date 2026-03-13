@@ -8,7 +8,7 @@ export interface Product {
     title: string;
     slug: string;
     description: string;
-    image: string;
+    images: string[]; // Changed from 'image' to 'images'
     affiliate_link: string;
     category: string;
     tags: string[];
@@ -18,7 +18,19 @@ export interface Product {
 export async function readProducts(): Promise<Product[]> {
     try {
         const data = await fs.readFile(DATA_FILE, 'utf8');
-        return JSON.parse(data);
+        const products = JSON.parse(data);
+
+        // Migration: Ensure all products use the 'images' array
+        return products.map((p: any) => {
+            if (p.image && !p.images) {
+                const { image, ...rest } = p;
+                return { ...rest, images: [image] };
+            }
+            if (!p.images) {
+                return { ...p, images: [] };
+            }
+            return p;
+        });
     } catch (error) {
         console.error('Error reading products:', error);
         return [];
