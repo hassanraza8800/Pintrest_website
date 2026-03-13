@@ -15,12 +15,16 @@ const FOLDER_ID = process.env.GOOGLE_DRIVE_FOLDER_ID || '1K4t2FaeGftzf8udEbH0KVW
  */
 async function loadSavedCredentialsIfExist() {
     try {
-        const TOKEN_PATH = path.join(process.cwd(), 'data/data.json');
-        const content = await fs.readFile(TOKEN_PATH, 'utf8');
+        // Priority 1: Environment Variable (for Vercel)
+        if (process.env.GOOGLE_TOKEN) {
+            return google.auth.fromJSON(JSON.parse(process.env.GOOGLE_TOKEN));
+        }
+
+        // Priority 2: Local File (for Development)
+        const LOCAL_TOKEN_PATH = path.join(process.cwd(), 'data/data.json');
+        const content = await fs.readFile(LOCAL_TOKEN_PATH, 'utf8');
         const creds = JSON.parse(content);
 
-        // This helper from googleapis properly handles the 'authorized_user' type
-        // if it has client_id, client_secret, and refresh_token.
         return google.auth.fromJSON(creds);
     } catch (err) {
         console.error('Error loading Google authentication:', err);
@@ -32,7 +36,17 @@ async function loadSavedCredentialsIfExist() {
  * Gets the OAuth client configuration from env or file.
  */
 export async function getGoogleAuthConfiguration() {
-    // Priority 2: Local Files
+    // Priority 1: Environment Variable (for Vercel)
+    if (process.env.GOOGLE_CREDENTIALS) {
+        try {
+            const creds = JSON.parse(process.env.GOOGLE_CREDENTIALS);
+            return creds.web || creds.installed || creds;
+        } catch (e) {
+            console.error('Error parsing GOOGLE_CREDENTIALS env:', e);
+        }
+    }
+
+    // Priority 2: Local Files (for Development)
     try {
         const content = await fs.readFile(CREDENTIALS_PATH, 'utf8');
         const creds = JSON.parse(content);
