@@ -156,3 +156,79 @@ export async function deleteImageFromDrive(imageUrl: string): Promise<void> {
         console.error('Error deleting file from Drive:', error);
     }
 }
+
+/**
+ * Saves a JSON object to a file on Google Drive.
+ * @param fileName Name of the file (e.g. products.json)
+ * @param data The object to save
+ */
+export async function saveJsonToDrive(fileName: string, data: any): Promise<void> {
+    try {
+        const drive = await getGoogleDriveClient();
+        const content = JSON.stringify(data, null, 2);
+
+        // 1. Check if the file already exists in the folder
+        const response = await drive.files.list({
+            q: `name = '${fileName}' and '${FOLDER_ID}' in parents and trashed = false`,
+            fields: 'files(id)',
+        });
+
+        const existingFile = response.data.files?.[0];
+
+        const media = {
+            mimeType: 'application/json',
+            body: Readable.from([content]),
+        };
+
+        if (existingFile?.id) {
+            // Update existing file
+            await drive.files.update({
+                fileId: existingFile.id,
+                media: media,
+            });
+        } else {
+            // Create new file
+            await drive.files.create({
+                requestBody: {
+                    name: fileName,
+                    parents: [FOLDER_ID],
+                },
+                media: media,
+            });
+        }
+    } catch (error) {
+        console.error(`Error saving ${fileName} to Drive:`, error);
+        throw error;
+    }
+}
+
+/**
+ * Reads a JSON file from Google Drive.
+ * @param fileName Name of the file (e.g. products.json)
+ * @returns The parsed JSON content or null if not found
+ */
+export async function readJsonFromDrive(fileName: string): Promise<any> {
+    try {
+        const drive = await getGoogleDriveClient();
+
+        // 1. Find the file
+        const response = await drive.files.list({
+            q: `name = '${fileName}' and '${FOLDER_ID}' in parents and trashed = false`,
+            fields: 'files(id)',
+        });
+
+        const fileId = response.data.files?.[0]?.id;
+        if (!fileId) return null;
+
+        // 2. Download the content
+        const file = await drive.files.get({
+            fileId: fileId,
+            alt: 'media',
+        });
+
+        return file.data;
+    } catch (error) {
+        console.error(`Error reading ${fileName} from Drive:`, error);
+        return null;
+    }
+}
