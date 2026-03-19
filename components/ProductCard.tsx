@@ -35,11 +35,16 @@ export default function ProductCard({ product }: { product: Product }) {
                         ))}
                     </div>
 
-                    <h3 className="font-bold text-[11px] sm:text-lg text-gray-900 line-clamp-2 group-hover:text-primary transition-colors leading-tight">
+                    <h3 className="font-bold text-[11px] sm:text-lg text-gray-900 line-clamp-1 group-hover:text-primary transition-colors leading-tight">
                         {product.title}
                     </h3>
+                    {product.price && (
+                        <p className="text-gray-600 font-bold text-[11px] sm:text-lg mt-0.5">
+                            {product.price}
+                        </p>
+                    )}
 
-                    <p className="text-gray-500 text-[10px] sm:text-sm mt-1 line-clamp-1 sm:line-clamp-2 leading-relaxed">
+                    <p className="text-gray-500 text-[10px] sm:text-sm mt-1 line-clamp-1 sm:line-clamp-2 leading-relaxed italic">
                         {product.description}
                     </p>
                 </div>

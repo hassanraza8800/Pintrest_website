@@ -3,6 +3,7 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { ExternalLink, Tag, ShieldCheck, Clock } from "lucide-react";
 import Link from "next/link";
+import ProductGallery from "@/components/ProductGallery";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = await params;
@@ -49,18 +50,9 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
                 </nav>
 
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-20">
-                    {/* Left: Product Image */}
+                    {/* Left: Product Image Gallery */}
                     <div className="lg:col-span-7">
-                        <div className="relative aspect-[1/1] sm:aspect-square rounded-2xl md:rounded-3xl overflow-hidden bg-gray-50 shadow-xl shadow-gray-200/50 group">
-                            <Image
-                                src={(product.images && product.images.length > 0) ? product.images[0] : "/placeholder.jpg"}
-                                alt={product.title}
-                                fill
-                                className="object-contain p-2 sm:p-4 md:p-8 hover:scale-105 transition-transform duration-700"
-                                priority
-                                sizes="(max-width: 1024px) 100vw, 60vw"
-                            />
-                        </div>
+                        <ProductGallery images={product.images} title={product.title} />
                     </div>
 
                     {/* Right: Product Details */}
@@ -73,6 +65,11 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
                                 <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-gray-900 leading-[1.1] tracking-tight">
                                     {product.title}
                                 </h1>
+                                {product.price && (
+                                    <p className="text-xl sm:text-2xl text-gray-500 font-bold mt-1">
+                                        {product.price}
+                                    </p>
+                                )}
                             </div>
 
                             <div className="flex flex-wrap gap-1.5">

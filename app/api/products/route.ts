@@ -13,13 +13,21 @@ export async function POST(request: Request) {
     try {
         const formData = await request.formData();
 
-        let imageUrl = formData.get('image') as string || '';
-        const imageFile = formData.get('image_file') as File | null;
+        const imageUrls: string[] = [];
+        
+        // Handle direct image URLs (if any, though UI currently sends one)
+        const imageParam = formData.get('image') as string;
+        if (imageParam) imageUrls.push(imageParam);
 
-        // If a file was uploaded, process it and upload to Google Drive
-        if (imageFile && imageFile.name) {
-            const buffer = Buffer.from(await imageFile.arrayBuffer());
-            imageUrl = await uploadImageToDrive(buffer, imageFile.type, imageFile.name);
+        // Handle multiple file uploads
+        const imageFiles = formData.getAll('image_file') as File[];
+        
+        for (const file of imageFiles) {
+            if (file && file.name) {
+                const buffer = Buffer.from(await file.arrayBuffer());
+                const url = await uploadImageToDrive(buffer, file.type, file.name);
+                imageUrls.push(url);
+            }
         }
 
         const tagsString = formData.get('tags') as string || '';
@@ -29,7 +37,8 @@ export async function POST(request: Request) {
             title: formData.get('title') as string || '',
             slug: formData.get('slug') as string || '',
             description: formData.get('description') as string || '',
-            images: imageUrl ? [imageUrl] : [],
+            price: formData.get('price') as string || '',
+            images: imageUrls,
             affiliate_link: formData.get('affiliate_link') as string || '',
             category: formData.get('category') as string || '',
             tags,
@@ -50,13 +59,18 @@ export async function PUT(request: Request) {
 
         if (!id) return NextResponse.json({ error: 'ID is required' }, { status: 400 });
 
-        let imageUrl = formData.get('image') as string || '';
-        const imageFile = formData.get('image_file') as File | null;
+        const existingImages = formData.getAll('images') as string[];
+        const imageUrls: string[] = [...existingImages];
 
-        // If a new file was uploaded, process it and upload to Google Drive
-        if (imageFile && imageFile.name) {
-            const buffer = Buffer.from(await imageFile.arrayBuffer());
-            imageUrl = await uploadImageToDrive(buffer, imageFile.type, imageFile.name);
+        // Handle multiple new file uploads
+        const imageFiles = formData.getAll('image_file') as File[];
+        
+        for (const file of imageFiles) {
+            if (file && file.name) {
+                const buffer = Buffer.from(await file.arrayBuffer());
+                const url = await uploadImageToDrive(buffer, file.type, file.name);
+                imageUrls.push(url);
+            }
         }
 
         const tagsString = formData.get('tags') as string || '';
@@ -66,7 +80,8 @@ export async function PUT(request: Request) {
             title: formData.get('title') as string || '',
             slug: formData.get('slug') as string || '',
             description: formData.get('description') as string || '',
-            images: imageUrl ? [imageUrl] : [],
+            price: formData.get('price') as string || '',
+            images: imageUrls,
             affiliate_link: formData.get('affiliate_link') as string || '',
             category: formData.get('category') as string || '',
             tags,

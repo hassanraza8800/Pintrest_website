@@ -10,6 +10,7 @@ export interface Product {
     title: string;
     slug: string;
     description: string;
+    price: string;
     images: string[];
     affiliate_link: string;
     category: string;

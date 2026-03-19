@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Plus, Edit, Trash2, LogOut, Package, AlertTriangle, X } from "lucide-react";
+import { Plus, Edit, Trash2, LogOut, Package, AlertTriangle, X, Eye } from "lucide-react";
 import { Product } from "@/lib/fileHandler";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -232,6 +232,14 @@ export default function AdminDashboard() {
                                                 </td>
                                                 <td className="px-6 py-4">
                                                     <div className="flex items-center justify-center space-x-2">
+                                                        <Link
+                                                            href={`/product/${product.slug}`}
+                                                            target="_blank"
+                                                            className="p-2 text-gray-400 hover:text-green-500 hover:bg-green-50 rounded-lg transition-all"
+                                                            title="View live page"
+                                                        >
+                                                            <Eye className="w-5 h-5" />
+                                                        </Link>
                                                         <Link
                                                             href={`/admin-secret/edit/${product.id}`}
                                                             className="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-all"
