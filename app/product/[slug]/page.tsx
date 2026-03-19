@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { ExternalLink, Tag, ShieldCheck, Clock } from "lucide-react";
 import Link from "next/link";
 import ProductGallery from "@/components/ProductGallery";
+import ProductDescription from "@/components/ProductDescription";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = await params;
@@ -82,9 +83,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
 
                             <div className="pt-6 sm:pt-8 border-t border-gray-100">
                                 <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3">Product Overview</h3>
-                                <div className="prose prose-sm max-w-none text-gray-600 leading-relaxed whitespace-pre-line text-sm">
-                                    {product.description}
-                                </div>
+                                <ProductDescription description={product.description} />
                             </div>
 
                             <div className="bg-gray-50/50 rounded-2xl md:rounded-3xl p-5 sm:p-6 md:p-8 space-y-6 border border-gray-100">
