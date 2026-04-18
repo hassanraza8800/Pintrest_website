@@ -47,7 +47,7 @@ export function normalizeDriveImageUrl(url: string): string {
     } 
     // Format 2: /file/d/ID/view
     else {
-        const pathMatch = trimmedUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+        const pathMatch = cleaned.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
         if (pathMatch && pathMatch[1]) {
             fileId = pathMatch[1];
         }
@@ -59,5 +59,5 @@ export function normalizeDriveImageUrl(url: string): string {
         return `https://lh3.googleusercontent.com/d/${fileId}=w1000`;
     }
 
-    return trimmedUrl;
+    return cleaned;
 }
