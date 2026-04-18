@@ -3,7 +3,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import { Readable } from 'stream';
 
-const TOKEN_PATH = path.join(process.cwd(), 'token.json');
+const DATA_TOKEN_PATH = path.join(process.cwd(), 'data/data.json');
 const CREDENTIALS_PATH = path.join(process.cwd(), 'credentials.json');
 
 // We use the environment variable for the folder ID if present.
@@ -21,8 +21,7 @@ async function loadSavedCredentialsIfExist() {
         }
 
         // Priority 2: Local File (for Development)
-        const LOCAL_TOKEN_PATH = path.join(process.cwd(), 'data/data.json');
-        const content = await fs.readFile(LOCAL_TOKEN_PATH, 'utf8');
+        const content = await fs.readFile(DATA_TOKEN_PATH, 'utf8');
         const creds = JSON.parse(content);
 
         return google.auth.fromJSON(creds);
@@ -119,12 +118,9 @@ export async function uploadImageToDrive(buffer: Buffer, mimeType: string, fileN
             },
         });
 
-        // The webContentLink is a direct download link, but webViewLink displays it better in the browser on its own.
-        // For Next.js <img src=""> tags to work gracefully with Google Drive without a workaround, 
-        // you often use the webContentLink or a modified URL formula.
-        // webContentLink example: https://drive.google.com/uc?id={fileId}&export=download
-        // However, webContentLink is safer to use for direct rendering.
-        const directImageUrl = `https://drive.google.com/uc?id=${fileId}`;
+        // The thumbnail API is the most reliable way to embed Drive images in web applications.
+        // It bypasses common permission/cookie issues that the "uc" links sometimes face.
+        const directImageUrl = `https://drive.google.com/thumbnail?id=${fileId}&sz=w1000`;
 
         return directImageUrl;
     } catch (error) {
@@ -140,9 +136,9 @@ export async function uploadImageToDrive(buffer: Buffer, mimeType: string, fileN
 export async function deleteImageFromDrive(imageUrl: string): Promise<void> {
     if (!imageUrl || !imageUrl.includes('drive.google.com')) return;
 
-    const drive = await getGoogleDriveClient();
-
     try {
+        const drive = await getGoogleDriveClient();
+
         // Extract file ID from URL (formula: https://drive.google.com/uc?id=FILE_ID)
         const urlObj = new URL(imageUrl);
         const fileId = urlObj.searchParams.get('id');
@@ -162,28 +158,31 @@ export async function deleteImageFromDrive(imageUrl: string): Promise<void> {
  * @param fileName Name of the file (e.g. products.json)
  * @param data The object to save
  */
-export async function saveJsonToDrive(fileName: string, data: any): Promise<void> {
+export async function saveJsonToDrive(fileName: string, data: any, fileId?: string): Promise<void> {
     try {
         const drive = await getGoogleDriveClient();
         const content = JSON.stringify(data, null, 2);
-
-        // 1. Check if the file already exists in the folder
-        const response = await drive.files.list({
-            q: `name = '${fileName}' and '${FOLDER_ID}' in parents and trashed = false`,
-            fields: 'files(id)',
-        });
-
-        const existingFile = response.data.files?.[0];
 
         const media = {
             mimeType: 'application/json',
             body: Readable.from([content]),
         };
 
-        if (existingFile?.id) {
+        let targetFileId = fileId;
+
+        // 1. If fileId is not provided, check if the file already exists in the folder by name
+        if (!targetFileId) {
+            const response = await drive.files.list({
+                q: `name = '${fileName}' and '${FOLDER_ID}' in parents and trashed = false`,
+                fields: 'files(id)',
+            });
+            targetFileId = response.data.files?.[0]?.id ?? undefined;
+        }
+
+        if (targetFileId) {
             // Update existing file
             await drive.files.update({
-                fileId: existingFile.id,
+                fileId: targetFileId,
                 media: media,
             });
         } else {
@@ -207,22 +206,26 @@ export async function saveJsonToDrive(fileName: string, data: any): Promise<void
  * @param fileName Name of the file (e.g. products.json)
  * @returns The parsed JSON content or null if not found
  */
-export async function readJsonFromDrive(fileName: string): Promise<any> {
+export async function readJsonFromDrive(fileName: string, fileId?: string): Promise<any> {
     try {
         const drive = await getGoogleDriveClient();
 
-        // 1. Find the file
-        const response = await drive.files.list({
-            q: `name = '${fileName}' and '${FOLDER_ID}' in parents and trashed = false`,
-            fields: 'files(id)',
-        });
+        let targetFileId = fileId;
 
-        const fileId = response.data.files?.[0]?.id;
-        if (!fileId) return null;
+        // 1. If fileId is not provided, find the file by name
+        if (!targetFileId) {
+            const response = await drive.files.list({
+                q: `name = '${fileName}' and '${FOLDER_ID}' in parents and trashed = false`,
+                fields: 'files(id)',
+            });
+            targetFileId = response.data.files?.[0]?.id ?? undefined;
+        }
+        
+        if (!targetFileId) return null;
 
         // 2. Download the content
         const file = await drive.files.get({
-            fileId: fileId,
+            fileId: targetFileId,
             alt: 'media',
         });
 

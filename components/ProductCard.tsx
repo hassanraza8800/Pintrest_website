@@ -1,9 +1,10 @@
-import Image from "next/image";
 import Link from "next/link";
 import { ExternalLink } from "lucide-react";
 import { Product } from "@/lib/fileHandler";
 
 export default function ProductCard({ product }: { product: Product }) {
+    const imageSrc = (product.images && product.images.length > 0) ? product.images[0] : "/logo.png";
+
     return (
         <div className="group bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow border border-gray-100 flex flex-col h-full relative">
             {/* Link to Detail Page */}
@@ -12,12 +13,17 @@ export default function ProductCard({ product }: { product: Product }) {
                 className="flex flex-col h-full"
             >
                 <div className="relative aspect-[1/1] overflow-hidden bg-gray-50/50">
-                    <Image
-                        src={(product.images && product.images.length > 0) ? product.images[0] : "/placeholder.jpg"}
+                    <img
+                        src={imageSrc}
                         alt={product.title}
-                        fill
-                        className="object-contain p-2 group-hover:scale-105 transition-transform duration-500"
-                        sizes="(max-width: 768px) 50vw, 33vw"
+                        className="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform duration-500"
+                        loading="lazy"
+                        referrerPolicy="no-referrer"
+                        onError={(e) => {
+                            const img = e.currentTarget as HTMLImageElement;
+                            img.onerror = null;
+                            img.src = "/logo.png";
+                        }}
                     />
                     <div className="absolute top-2 left-2">
                         <span className="bg-white/90 backdrop-blur-md px-1.5 py-0.5 rounded-md text-[7px] sm:text-[9px] font-black text-gray-700 shadow-sm uppercase tracking-tighter">

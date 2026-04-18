@@ -1,4 +1,4 @@
-import { readProducts } from "@/lib/fileHandler";
+import { getRemoteProducts } from "@/lib/remoteApi";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { ExternalLink, Tag, ShieldCheck, Clock } from "lucide-react";
@@ -9,7 +9,7 @@ import ProductDescription from "@/components/ProductDescription";
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = await params;
     const decodedSlug = decodeURIComponent(slug).toLowerCase().trim();
-    const products = await readProducts();
+    const products = await getRemoteProducts();
     const product = products.find((p) => p.slug.toLowerCase().trim() === decodedSlug);
 
     if (!product) return { title: "Product Not Found" };
@@ -27,7 +27,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 export default async function ProductDetailPage({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = await params;
     const decodedSlug = decodeURIComponent(slug).toLowerCase().trim();
-    const products = await readProducts();
+    const products = await getRemoteProducts();
     const product = products.find((p) => p.slug.toLowerCase().trim() === decodedSlug);
 
     if (!product) {

@@ -1,12 +1,15 @@
 import fs from 'fs/promises';
 import path from 'path';
 import { readJsonFromDrive, saveJsonToDrive } from './googleDrive';
+import { normalizeDriveImageUrl } from './imageHelper';
 
 const DATA_FILE = path.join(process.cwd(), 'data', 'products.json');
 const CLOUD_FILENAME = 'products.json';
+const CLOUD_FILE_ID = process.env.GOOGLE_DRIVE_PRODUCTS_FILE_ID || '1tX0uCHQ9fei_oYyNyKDo0d67tvkxsj9D';
 
 export interface Product {
     id: string;
+    externalId?: string;
     title: string;
     slug: string;
     description: string;
@@ -16,6 +19,7 @@ export interface Product {
     category: string;
     tags: string[];
     created_at: string;
+    updated_at?: string;
 }
 
 export async function readProducts(): Promise<Product[]> {
@@ -23,7 +27,7 @@ export async function readProducts(): Promise<Product[]> {
         let products: any[] = [];
 
         // 1. Try reading from Google Drive (Primary for Vercel)
-        const cloudData = await readJsonFromDrive(CLOUD_FILENAME);
+        const cloudData = await readJsonFromDrive(CLOUD_FILENAME, CLOUD_FILE_ID);
         if (cloudData) {
             products = Array.isArray(cloudData) ? cloudData : [];
         } else {
@@ -37,16 +41,29 @@ export async function readProducts(): Promise<Product[]> {
             }
         }
 
-        // Migration: Ensure all products use the 'images' array
+        // Migration: Ensure all products use the 'images' array and normalized URLs
         return products.map((p: any) => {
+            let images: string[] = [];
+
+            // Case 1: has singular 'image' field but no 'images' array
             if (p.image && !p.images) {
-                const { image, ...rest } = p;
-                return { ...rest, images: [image] };
+                const imageData = Array.isArray(p.image) ? p.image : [p.image];
+                images = imageData.map(normalizeDriveImageUrl);
             }
-            if (!p.images) {
-                return { ...p, images: [] };
+            // Case 2: has 'images' but it's a string instead of array
+            else if (p.images && typeof p.images === 'string') {
+                images = [normalizeDriveImageUrl(p.images)];
             }
-            return p;
+            // Case 3: standard 'images' array
+            else if (Array.isArray(p.images)) {
+                images = p.images.map(normalizeDriveImageUrl);
+            }
+            // Case 4: missing 'images' entirely
+            else {
+                images = [];
+            }
+
+            return { ...p, images };
         });
     } catch (error) {
         console.error('Error reading products:', error);
@@ -60,7 +77,7 @@ export async function writeProducts(products: Product[]): Promise<void> {
 
     // 1. Try saving to Google Drive (Required for Vercel production)
     try {
-        await saveJsonToDrive(CLOUD_FILENAME, products);
+        await saveJsonToDrive(CLOUD_FILENAME, products, CLOUD_FILE_ID);
         success = true;
     } catch (err) {
         console.error('Failed to save products to Google Drive:', err);

@@ -31,6 +31,8 @@ export default function ProductGallery({ images, title }: ProductGalleryProps) {
                             alt={`${title} thumbnail ${index + 1}`}
                             fill
                             className="object-cover"
+                            unoptimized
+                            referrerPolicy="no-referrer"
                         />
                     </button>
                 ))}
@@ -45,6 +47,8 @@ export default function ProductGallery({ images, title }: ProductGalleryProps) {
                     className="object-contain p-2 sm:p-4 md:p-8 transition-all duration-500"
                     priority
                     sizes="(max-width: 1024px) 100vw, 60vw"
+                    unoptimized
+                    referrerPolicy="no-referrer"
                 />
 
                 {/* Mobile Navigation Arrows */}
@@ -81,6 +85,8 @@ export default function ProductGallery({ images, title }: ProductGalleryProps) {
                             alt={`${title} thumb ${index}`}
                             fill
                             className="object-cover"
+                            unoptimized
+                            referrerPolicy="no-referrer"
                         />
                     </button>
                 ))}

@@ -1,5 +1,5 @@
 import ProductGrid from "@/components/ProductGrid";
-import { readProducts } from "@/lib/fileHandler";
+import { getRemoteProducts } from "@/lib/remoteApi";
 
 export default async function ProductsPage({
     searchParams,
@@ -7,7 +7,7 @@ export default async function ProductsPage({
     searchParams: Promise<{ category?: string }>;
 }) {
     const { category } = await searchParams;
-    const allProducts = await readProducts();
+    const allProducts = await getRemoteProducts();
 
     const filteredProducts = category
         ? allProducts.filter(p => p.category.toLowerCase() === category.toLowerCase())

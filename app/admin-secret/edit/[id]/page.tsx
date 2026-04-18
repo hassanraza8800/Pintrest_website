@@ -35,11 +35,10 @@ export default function EditProduct() {
 
     const fetchProduct = async () => {
         try {
-            const res = await fetch("/api/products");
-            const products = await res.json();
-            const product = products.find((p: any) => p.id === id);
+            const res = await fetch(`/api/products?id=${id}`);
+            const product = await res.json();
 
-            if (product) {
+            if (!product?.error) {
                 setFormData({
                     title: product.title || "",
                     slug: product.slug || "",

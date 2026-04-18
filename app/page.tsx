@@ -1,10 +1,10 @@
 import ProductGrid from "@/components/ProductGrid";
-import { readProducts } from "@/lib/fileHandler";
+import { getRemoteProducts } from "@/lib/remoteApi";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
 export default async function Home() {
-    const products = await readProducts();
+    const products = await getRemoteProducts();
     const featuredProducts = products.slice(0, 4);
 
     return (

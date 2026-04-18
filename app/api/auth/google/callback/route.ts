@@ -34,10 +34,10 @@ export async function GET(request: Request) {
         try {
             const TOKEN_PATH = path.join(process.cwd(), 'data/data.json');
             await fs.writeFile(TOKEN_PATH, JSON.stringify({
+                ...tokens,
+                client_id,
+                client_secret,
                 type: 'authorized_user',
-                client_id: client_id,
-                client_secret: client_secret,
-                refresh_token: tokens.refresh_token,
             }, null, 2));
             console.log('✅ Successfully saved token to data/data.json');
         } catch (saveError) {

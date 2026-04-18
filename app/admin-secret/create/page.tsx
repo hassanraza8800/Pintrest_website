@@ -74,7 +74,7 @@ export default function CreateProduct() {
             payload.append("category", formData.category);
             payload.append("tags", formData.tags);
 
-            imageUrls.forEach(url => payload.append("image", url));
+            imageUrls.forEach(url => payload.append("images", url));
             imageFiles.forEach(file => payload.append("image_file", file));
 
             const res = await fetch("/api/products", {
